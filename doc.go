@@ -1,6 +1,6 @@
 // GOMAXPROCS == os.MaxCores
 
-// TIME=30 minutes
+// TIME=30 minutes (ACTUAL=1 HOUR)
 // CLI variables
 //
 // -c, --clients CLIENTS, default=1
@@ -9,7 +9,7 @@
 // -v, --verbose (boolean) whether or not to write summary information to os.Stderr
 // -p, --property key:value (passed as a map[string]string to behaviors)
 
-// TIME=1 HOUR
+// TIME=1 HOUR (ACTUAL=3 HOURS)
 // a behavior:
 // control load by varying the number of distinct sessions (each session has its own conn pool)
 // hard-coded to use mgo with the counter increment bm for now

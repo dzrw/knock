@@ -4,6 +4,15 @@ import (
 	"testing"
 )
 
+func expectOk(t *testing.T, err error) (ok bool) {
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	return true
+}
+
 func expectInt(t *testing.T, expected, actual int) (ok bool) {
 	if actual != expected {
 		t.Errorf("expected: %d, got: %d", expected, actual)
