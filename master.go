@@ -44,12 +44,10 @@ type master struct {
 }
 
 func NewMaster(conf *BamConfig) *master {
-	t0 := time.Now().Add(2 * time.Second)
 	wg := &sync.WaitGroup{}
 
 	return &master{
 		conf:      conf,
-		t0:        t0,
 		wg:        wg,
 		tm:        NewTaskMaster(wg),
 		hosts:     make([]*sandbox, conf.Goroutines),
@@ -83,7 +81,7 @@ func (this *master) loop() {
 	this.setup()
 
 	rtChan := this.tm.ResponseTimes()
-	prChan := time.After(3 * time.Second)
+	prChan := time.After(2 * time.Second)
 
 	for {
 		select {
@@ -107,6 +105,9 @@ func (this *master) loop() {
 }
 
 func (this *master) setup() {
+	// Record approximate start time
+	this.t0 = time.Now()
+
 	// Describe sandboxes
 	infos := make([]*SandboxInfo, this.conf.Goroutines)
 	for i := 0; i < this.conf.Goroutines; i += 1 {
