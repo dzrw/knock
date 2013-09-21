@@ -150,4 +150,18 @@ Every 2 seconds,
   ...
 
 */
+
+/*
+  - fix the clients over goroutines bug
+
+  - finalize the generated reports
+    -- latency histogram
+    -- runtime/latency/throughput/planned load/active load
+    -- throughput vs latency (XR curve)
+
+  - finalize summary output
+    -- fix bug where the last second/final numbers aren't displayed
+
+  - add properties for tuning internal channel buffer sizes
+*/
 package main

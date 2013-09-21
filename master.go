@@ -109,8 +109,9 @@ func (this *master) setup() {
 	this.t0 = time.Now()
 
 	// Describe sandboxes
+	count := this.conf.Goroutines
 	infos := make([]*SandboxInfo, this.conf.Goroutines)
-	for i := 0; i < this.conf.Goroutines; i += 1 {
+	for i := 0; i < count; i += 1 {
 		infos[i] = &SandboxInfo{
 			Id:          i,
 			Properties:  this.conf.Properties,
@@ -126,7 +127,7 @@ func (this *master) setup() {
 	j := 0
 	for i := 0; i < this.conf.Clients; i += 1 {
 		infos[j].ClientCount += 1
-		j += 1
+		j = (j + 1) % count
 	}
 
 	// Initialize sandboxes

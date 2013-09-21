@@ -9,7 +9,7 @@ import (
 
 func TestMaster(t *testing.T) {
 	args := []string{
-		"-c", "2",
+		"-c", "8",
 		"-g", "2",
 		"-d", "60",
 		"-p", "mongodb.url:mongodb://localhost:27017",
