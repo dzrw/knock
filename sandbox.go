@@ -8,13 +8,12 @@ import (
 )
 
 type SandboxInfo struct {
-	Id          int
-	Properties  map[string]string
-	Duration    time.Duration
-	StartTime   time.Time
-	Emitter     LatencyEmitter
-	WaitGroup   *sync.WaitGroup
-	ClientCount int
+	Id         int
+	Properties map[string]string
+	Duration   time.Duration
+	StartTime  time.Time
+	Emitter    LatencyEmitter
+	WaitGroup  *sync.WaitGroup
 }
 
 type sandbox struct {
@@ -24,9 +23,7 @@ type sandbox struct {
 	start   time.Time
 	emitter LatencyEmitter
 	wg      *sync.WaitGroup
-	count   int
-
-	clients []Client
+	client  Client
 }
 
 func NewSandbox(info *SandboxInfo) *sandbox {
@@ -37,8 +34,7 @@ func NewSandbox(info *SandboxInfo) *sandbox {
 		info.StartTime,
 		info.Emitter,
 		info.WaitGroup,
-		info.ClientCount,
-		make([]Client, info.ClientCount),
+		nil,
 	}
 }
 
@@ -64,17 +60,15 @@ func (this *sandbox) loop() {
 }
 
 func (this *sandbox) setup() {
-	for i := 0; i < this.count; i += 1 {
-		res, err := this.init(i)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		this.clients[i] = res
+	res, err := this.init()
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	this.client = res
 }
 
-func (this *sandbox) init(clientId int) (res Client, err error) {
+func (this *sandbox) init() (res Client, err error) {
 	defer func() {
 		e := recover()
 		if e != nil {
@@ -100,14 +94,10 @@ func (this *sandbox) expired() (ok bool) {
 }
 
 func (this *sandbox) update() {
-	for i, client := range this.clients {
-		if client != nil {
-			_ = this.work(i, client)
-		}
-	}
+	_ = this.work()
 }
 
-func (this *sandbox) work(clientId int, client Client) (err error) {
+func (this *sandbox) work() (err error) {
 	defer func() {
 		e := recover()
 		if e != nil {
@@ -120,25 +110,19 @@ func (this *sandbox) work(clientId int, client Client) (err error) {
 	}()
 
 	t0 := time.Now()
-	_ = client.Work()
-	rt := time.Since(t0) / time.Microsecond
+	_ = this.client.Work()
+	usec := int64(time.Since(t0) / time.Microsecond)
 
-	this.emitter.WriteResponseTime(this.id, clientId, int64(rt))
+	this.emitter.PublishResponseTime(this.id, usec)
 	return
 }
 
 func (this *sandbox) teardown() {
-	for i, client := range this.clients {
-		if client != nil {
-			this.close(client)
-			this.clients[i] = nil
-		}
-	}
-
+	this.close()
 	this.wg.Done()
 }
 
-func (this *sandbox) close(client Client) (err error) {
+func (this *sandbox) close() (err error) {
 	defer func() {
 		e := recover()
 		if e != nil {
@@ -150,6 +134,7 @@ func (this *sandbox) close(client Client) (err error) {
 		return
 	}()
 
-	client.Close()
+	this.client.Close()
+	this.client = nil
 	return
 }

@@ -21,11 +21,10 @@ func TestSandbox(t *testing.T) {
 		Properties: map[string]string{
 			"mongodb.url": "mongodb://localhost:27017",
 		},
-		Duration:    15 * time.Second,
-		StartTime:   t0,
-		Emitter:     tm,
-		WaitGroup:   wg,
-		ClientCount: 4,
+		Duration:  15 * time.Second,
+		StartTime: t0,
+		Emitter:   tm,
+		WaitGroup: wg,
 	})
 
 	sb.Start()

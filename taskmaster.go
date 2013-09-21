@@ -5,29 +5,25 @@ import (
 	"sync"
 )
 
-// TIME=1 HOUR (stats funnel, waitgroup)
-// observer:
-// spawn a goroutine with a tomb and a waitgroup to monitor slaves
-// observer exposes a Receive() <-chan for master to listen for stats, and
-//  a Report(slaveid, latency) method for slaves to write stats.
-//  internally, this wraps around an unbuffered channel that can later be
-//  expanded into a bufferred or elastic channel (or multiple channels)
-//  if it becomes a bottleneck.
-
 type LatencyEmitter interface {
-	WriteResponseTime(hostId, clientId int, latency int64)
+	PublishResponseTime(clientId int, latency int64)
 }
 
-type LatencyEventsChannel <-chan int64
+type LatencyEvent struct {
+	id   int
+	usec int64
+}
+
+type LatencyEventsChannel <-chan *LatencyEvent
 
 type taskmaster struct {
-	ch chan int64
+	ch chan *LatencyEvent
 	t  tomb.Tomb
 	wg *sync.WaitGroup
 }
 
 func NewTaskMaster(wg *sync.WaitGroup) *taskmaster {
-	return &taskmaster{ch: make(chan int64), wg: wg}
+	return &taskmaster{ch: make(chan *LatencyEvent), wg: wg}
 }
 
 func (this *taskmaster) Start() {
@@ -43,8 +39,8 @@ func (this *taskmaster) ResponseTimes() LatencyEventsChannel {
 	return this.ch
 }
 
-func (this *taskmaster) WriteResponseTime(hostId, clientId int, latency int64) {
-	this.ch <- latency
+func (this *taskmaster) PublishResponseTime(clientId int, latency int64) {
+	this.ch <- &LatencyEvent{clientId, latency}
 }
 
 func (this *taskmaster) loop() {

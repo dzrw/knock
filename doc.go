@@ -152,12 +152,18 @@ Every 2 seconds,
 */
 
 /*
-  - fix the clients over goroutines bug
+  - fix the clients over goroutines bug (ACTUAL= 10 min)
+
+  - switch to 1 client per goroutine (ESTIMATED=30 min)
+    -- the multiplexing is unnecessary and confusing
+    -- the efficiency drops anyway
+    -- bad assumption that it would be faster/better than the go scheduler
 
   - finalize the generated reports
     -- latency histogram
     -- runtime/latency/throughput/planned load/active load
     -- throughput vs latency (XR curve)
+    -- per-client latency/throughput (to check for slow/underscheduled goroutines)
 
   - finalize summary output
     -- fix bug where the last second/final numbers aren't displayed

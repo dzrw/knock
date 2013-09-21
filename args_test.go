@@ -4,16 +4,9 @@ import (
 	"testing"
 )
 
-// -c, --clients CLIENTS, default=1
-// -g, --goroutines GOROUTINES, default=1
-// -d, --duration TIMEOUT_SECONDS, duration of test, default=notset
-// -v, --verbose (boolean) whether or not to write summary information to os.Stderr
-// -p, --property key:value (passed as a map[string]string to behaviors)
-
 func TestParseArguments(t *testing.T) {
 	args := []string{
 		"-c", "5",
-		"-g", "4",
 		"-d", "30",
 		"-v",
 		"-p", "a:1",
@@ -27,10 +20,6 @@ func TestParseArguments(t *testing.T) {
 	}
 
 	if !expectInt(t, 5, opts.Clients) {
-		return
-	}
-
-	if !expectInt(t, 4, opts.Goroutines) {
 		return
 	}
 
@@ -79,15 +68,11 @@ func TestDefaultValuesOfArguments(t *testing.T) {
 		return
 	}
 
-	if !expectInt(t, 1, opts.Clients) {
+	if !expectInt(t, MIN_LOAD, opts.Clients) {
 		return
 	}
 
-	if !expectInt(t, 1, opts.Goroutines) {
-		return
-	}
-
-	if !expectInt(t, 10, opts.Duration) {
+	if !expectInt(t, MIN_RUN_TIME, opts.Duration) {
 		return
 	}
 
@@ -101,7 +86,7 @@ func TestDefaultValuesOfArguments(t *testing.T) {
 }
 
 func TestLowerBoundsOfArguments(t *testing.T) {
-	args := []string{"-d", "0", "-c", "0", "-g", "0"}
+	args := []string{"-d", "0", "-c", "0"}
 
 	opts, err := parseArgs(args)
 	if err != nil {
@@ -109,33 +94,11 @@ func TestLowerBoundsOfArguments(t *testing.T) {
 		return
 	}
 
-	if !expectInt(t, 1, opts.Clients) {
+	if !expectInt(t, MIN_LOAD, opts.Clients) {
 		return
 	}
 
-	if !expectInt(t, 1, opts.Goroutines) {
-		return
-	}
-
-	if !expectInt(t, 10, opts.Duration) {
-		return
-	}
-}
-
-func TestUpperBoundsOfArguments(t *testing.T) {
-	args := []string{"-c", "1", "-g", "2"}
-
-	opts, err := parseArgs(args)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if !expectInt(t, 1, opts.Clients) {
-		return
-	}
-
-	if !expectInt(t, 1, opts.Goroutines) {
+	if !expectInt(t, MIN_RUN_TIME, opts.Duration) {
 		return
 	}
 }

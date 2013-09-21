@@ -10,8 +10,7 @@ import (
 func TestMaster(t *testing.T) {
 	args := []string{
 		"-c", "8",
-		"-g", "2",
-		"-d", "60",
+		"-d", "30",
 		"-p", "mongodb.url:mongodb://localhost:27017",
 	}
 
@@ -20,6 +19,8 @@ func TestMaster(t *testing.T) {
 		t.Error(err)
 		return
 	}
+
+	log.Printf("Running a %d second test...", conf.Duration)
 
 	m := NewMaster(conf)
 	m.Start()

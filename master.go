@@ -50,7 +50,7 @@ func NewMaster(conf *BamConfig) *master {
 		conf:      conf,
 		wg:        wg,
 		tm:        NewTaskMaster(wg),
-		hosts:     make([]*sandbox, conf.Goroutines),
+		hosts:     make([]*sandbox, conf.Clients),
 		hist:      make(map[int64]int),
 		statsChan: make(chan *SummaryEvent),
 	}
@@ -93,7 +93,7 @@ func (this *master) loop() {
 			this.t.Kill(nil)
 
 		case <-prChan:
-			this.statsChan <- this.summarize()
+			this.summarize()
 			prChan = time.After(ProgressInterval)
 
 		default:
@@ -108,31 +108,18 @@ func (this *master) setup() {
 	// Record approximate start time
 	this.t0 = time.Now()
 
-	// Describe sandboxes
-	count := this.conf.Goroutines
-	infos := make([]*SandboxInfo, this.conf.Goroutines)
+	// Initialize client sandboxes
+	count := this.conf.Clients
 	for i := 0; i < count; i += 1 {
-		infos[i] = &SandboxInfo{
-			Id:          i,
-			Properties:  this.conf.Properties,
-			Duration:    this.conf.d,
-			StartTime:   this.t0,
-			Emitter:     this.tm,
-			WaitGroup:   this.wg,
-			ClientCount: 0,
+		info := &SandboxInfo{
+			Id:         i,
+			Properties: this.conf.Properties,
+			Duration:   this.conf.d,
+			StartTime:  this.t0,
+			Emitter:    this.tm,
+			WaitGroup:  this.wg,
 		}
-	}
 
-	// Distribute clients evenly over sandboxes
-	j := 0
-	for i := 0; i < this.conf.Clients; i += 1 {
-		infos[j].ClientCount += 1
-		j = (j + 1) % count
-	}
-
-	// Initialize sandboxes
-	this.hosts = make([]*sandbox, this.conf.Goroutines)
-	for i, info := range infos {
 		this.hosts[i] = NewSandbox(info)
 		this.wg.Add(1)
 	}
@@ -156,10 +143,12 @@ func (this *master) capture(ch LatencyEventsChannel, reads int) {
 	chunk_ops := int64(0)
 
 	for i := 0; i < reads; i += 1 {
-		usec, ok := <-ch
+		evt, ok := <-ch
 		if !ok {
 			break
 		}
+
+		usec := evt.usec
 
 		// Update the histogram
 		if count, ok := hist[usec]; ok {
@@ -177,7 +166,7 @@ func (this *master) capture(ch LatencyEventsChannel, reads int) {
 	this.curr_ops += chunk_ops
 }
 
-func (this *master) summarize() *SummaryEvent {
+func (this *master) summarize() {
 	run_time := time.Since(this.t0)
 	next_ops := this.last_ops + this.curr_ops
 
@@ -198,5 +187,9 @@ func (this *master) summarize() *SummaryEvent {
 	this.curr_lag_sum = 0
 	this.curr_ops = 0
 
-	return &SummaryEvent{run_time, next_lag_avg, next_ops_sec}
+	this.publishSummaryEvent(run_time, next_lag_avg, next_ops_sec)
+}
+
+func (this *master) publishSummaryEvent(running time.Duration, meanResponseTimeUsec, opsPerSec float64) {
+	this.statsChan <- &SummaryEvent{running, meanResponseTimeUsec, opsPerSec}
 }

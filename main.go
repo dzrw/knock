@@ -25,8 +25,6 @@ func main() {
 	}
 
 	run(conf)
-
-	println("\n\ngoodbye")
 }
 
 func run(conf *BamConfig) {
@@ -47,7 +45,7 @@ func await(conf *BamConfig, m *master) {
 	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
 
 	if conf.Verbose {
-		fmt.Fprintln(os.Stderr, "running benchmark...\n")
+		fmt.Fprintln(os.Stderr, "starting benchmark...\015")
 	}
 
 	for {
@@ -75,6 +73,7 @@ func await(conf *BamConfig, m *master) {
 
 func printSummary(conf *BamConfig, evt *SummaryEvent, t0 time.Time) {
 	const msg = "[RUN %4ds] Throughput (ops/sec): %.3f, Response Time (usec): %.3f, Efficiency (%%): %.3f\015"
+	const gmsg = "%4d\t%.3f\t%.3f\t%.3f\n"
 
 	running := int(time.Since(t0).Seconds())
 
@@ -82,7 +81,7 @@ func printSummary(conf *BamConfig, evt *SummaryEvent, t0 time.Time) {
 	active := evt.MeanResponseTimeMs * (evt.OpsPerSecond / 1e6)
 	efficiency := active / float64(planned)
 
-	fmt.Fprintf(os.Stderr, msg, running, evt.OpsPerSecond, evt.MeanResponseTimeMs, efficiency)
+	fmt.Fprintf(os.Stderr, gmsg, running, evt.OpsPerSecond, evt.MeanResponseTimeMs, efficiency)
 }
 
 func printHistogram(conf *BamConfig, m *master) {
