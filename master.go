@@ -11,7 +11,7 @@ package main
 
 import (
 	"launchpad.net/tomb"
-	"log"
+	_ "log"
 	"sync"
 	"time"
 )
@@ -76,27 +76,27 @@ func (this *master) Histogram() map[int64]int {
 }
 
 func (this *master) loop() {
+	const ProgressInterval = 1 * time.Second
+
 	defer this.t.Done()
 
 	this.setup()
 
 	rtChan := this.tm.ResponseTimes()
-	prChan := time.After(2 * time.Second)
+	prChan := time.After(3 * time.Second)
 
 	for {
 		select {
 		case <-this.t.Dying():
-			log.Print("master dying")
 			this.shutdown()
 			return
 
 		case <-this.tm.t.Dead():
-			log.Print("master observes taskmaster death")
 			this.t.Kill(nil)
 
 		case <-prChan:
 			this.statsChan <- this.summarize()
-			prChan = time.After(2 * time.Second)
+			prChan = time.After(ProgressInterval)
 
 		default:
 			// Attempt to read from the channel a bunch of times
@@ -184,8 +184,6 @@ func (this *master) summarize() *SummaryEvent {
 	w1 := float64(this.curr_ops) / float64(next_ops)
 	curr_lag_avg := float64(this.curr_lag_sum) / float64(this.curr_ops)
 	next_lag_avg := (w0 * this.last_lag_avg) + (w1 * curr_lag_avg)
-
-	log.Printf("w: <%f, %f>", w0, w1)
 
 	// Compute the current throughput ops/sec
 	next_ops_sec := float64(next_ops) / run_time.Seconds()
