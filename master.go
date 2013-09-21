@@ -16,6 +16,10 @@ import (
 	"time"
 )
 
+type SummaryEmitter interface {
+	PublishSummaryEvent(d time.Duration, throughput, responseTime float64)
+}
+
 type SummaryEvent struct {
 	Duration           time.Duration
 	MeanResponseTimeMs float64
@@ -194,9 +198,9 @@ func (this *master) summarize() {
 	this.curr_lag_sum = 0
 	this.curr_ops = 0
 
-	this.publishSummaryEvent(run_time, next_lag_avg, next_ops_sec)
+	this.PublishSummaryEvent(run_time, next_ops_sec, next_lag_avg)
 }
 
-func (this *master) publishSummaryEvent(running time.Duration, meanResponseTimeUsec, opsPerSec float64) {
-	this.statsChan <- &SummaryEvent{running, meanResponseTimeUsec, opsPerSec}
+func (this *master) PublishSummaryEvent(d time.Duration, throughput, responseTime float64) {
+	this.statsChan <- &SummaryEvent{d, responseTime, throughput}
 }
