@@ -168,6 +168,7 @@ Every 2 seconds,
   - finalize summary output
     -- fix bug where the last second/final numbers aren't displayed (FIXED=5 min)
 
-  - add properties for tuning internal channel buffer sizes
+  - add properties for tuning internal channel buffer sizes (ACTUAL=30 min)
+    -- specifically, the taskmaster's LatencyEventChannel.
 */
 package main

@@ -49,7 +49,7 @@ func NewMaster(conf *BamConfig) *master {
 	return &master{
 		conf:      conf,
 		wg:        wg,
-		tm:        NewTaskMaster(wg),
+		tm:        nil,
 		hosts:     make([]*sandbox, conf.Clients),
 		hist:      make(map[int64]int),
 		statsChan: make(chan *SummaryEvent),
@@ -107,6 +107,12 @@ func (this *master) loop() {
 func (this *master) setup() {
 	// Record approximate start time
 	this.t0 = time.Now()
+
+	// Initialize the taskmaster
+	this.tm = NewTaskMaster(&TaskMasterInfo{
+		WaitGroup:  this.wg,
+		Properties: this.conf.Properties,
+	})
 
 	// Initialize client sandboxes
 	count := this.conf.Clients
