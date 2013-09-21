@@ -2,12 +2,21 @@ package main
 
 import (
 	"log"
+	"math/rand"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
+	"time"
 )
 
 func main() {
+	// Schedule all of the logical cores.
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	// Seed the RNG (doesn't happen automatically).
+	rand.Seed(time.Now().UnixNano())
+
 	// Parse the command line.
 	opts, err := parseArgs(os.Args[1:])
 	if err != nil {

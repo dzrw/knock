@@ -2,6 +2,7 @@ package main
 
 import (
 	goflags "github.com/jessevdk/go-flags"
+	"time"
 )
 
 // -c, --clients CLIENTS, default=1
@@ -16,6 +17,8 @@ type BamConfig struct {
 	Duration   int               `short:"d" long:"duration" value-name:"SECONDS" description:"the number of seconds to run this benchmark" default:"10" optional:"true"`
 	Verbose    bool              `short:"v" long:"verbose" default:"false" optional:"true"`
 	Properties map[string]string `short:"p" description:"additional properties" optional:"true"`
+
+	d time.Duration
 }
 
 // Parses the command-line arguments, and validates them.
@@ -44,5 +47,6 @@ func parseArgs(args []string) (opts *BamConfig, err error) {
 		opts.Duration = 10
 	}
 
+	opts.d = time.Duration(opts.Duration) * time.Second
 	return
 }

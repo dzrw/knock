@@ -63,13 +63,18 @@ c := database.C("ycsb").Upsert(selector, diff)
 // Operate() Perform a random unit of work (1 op) against the DB
 //   (a Read, a Write, etc)
 
-// TIME=1 HOUR
+// TIME=1 HOUR (ACTUAL=1.5 HOURS)
 // slaves:
 // slaves perform operations until the test duration expires, then they terminate
 // stream <slaveid,latency_msec> back to master over a fixed number of W channels (W=1)
 // partition sessions into individual goroutines ("slaves")
+//  - has a timeout/duration
+//  - has more than 1 client
+//  - is-a goroutine
+//  - performs the client protocol (init, work, close)
+//  - decrements a waitgroup when the duration/timeout elapses
 
-// TIME=1 HOUR (stats funnel, waitgroup)
+// TIME=1 HOUR (stats funnel, waitgroup) (ACTUAL= ~1 HOUR)
 // observer:
 // spawn a goroutine with a tomb and a waitgroup to monitor slaves
 // observer exposes a Receive() <-chan for master to listen for stats, and

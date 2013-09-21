@@ -7,7 +7,6 @@ import (
 	"labix.org/v2/mgo/bson"
 	"math/rand"
 	"strconv"
-	"time"
 )
 
 const (
@@ -30,8 +29,6 @@ type mgo_incr_client struct {
 type M bson.M
 
 func (this *mgo_incr_client) Init(props map[string]string) (err error) {
-	rand.Seed(time.Now().UnixNano())
-
 	err = this.parseProperties(props)
 	if err != nil {
 		return
