@@ -110,10 +110,10 @@ func (this *sandbox) work() (err error) {
 	}()
 
 	t0 := time.Now()
-	_ = this.client.Work()
+	res := this.client.Work()
 	usec := int64(time.Since(t0) / time.Microsecond)
 
-	this.emitter.PublishResponseTime(this.id, usec)
+	this.emitter.PublishResponseTime(this.id, usec, res)
 	return
 }
 

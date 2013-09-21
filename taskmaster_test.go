@@ -12,7 +12,7 @@ func spawnTask(emitter LatencyEmitter, wg *sync.WaitGroup, count int) {
 		log.Print("test task starting")
 
 		for i := 0; i < count; i += 1 {
-			emitter.PublishResponseTime(-1, int64(i))
+			emitter.PublishResponseTime(-1, int64(i), WRK_OK)
 			<-time.After(25 * time.Millisecond)
 		}
 
