@@ -43,7 +43,10 @@ func TestTaskMaster(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 
-	tm := NewTaskMaster(wg)
+	tm := NewTaskMaster(&TaskMasterInfo{
+		WaitGroup:  wg,
+		Properties: make(map[string]string),
+	})
 	tm.Start()
 
 	spawnTask(tm, wg, 50)
