@@ -37,12 +37,25 @@ type taskmaster struct {
 }
 
 func NewTaskMaster(info *TaskMasterInfo) *taskmaster {
-	return &taskmaster{
+	tm := &taskmaster{
 		wg:     info.WaitGroup,
 		props:  info.Properties,
 		ch:     nil,
 		chSize: DEFAULT_LATENCY_EVENT_CHANNEL_SIZE,
 	}
+
+	err := tm.parseProperties(tm.props)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if tm.chSize == 0 {
+		tm.ch = make(chan *LatencyEvent)
+	} else {
+		tm.ch = make(chan *LatencyEvent, tm.chSize)
+	}
+
+	return tm
 }
 
 func (this *taskmaster) Start() {
@@ -65,8 +78,6 @@ func (this *taskmaster) PublishResponseTime(clientId int, latency int64, res Wor
 func (this *taskmaster) loop() {
 	defer this.t.Done()
 
-	this.setup()
-
 	for {
 		select {
 		case <-this.t.Dying():
@@ -76,19 +87,6 @@ func (this *taskmaster) loop() {
 			this.wg.Wait()
 			this.t.Kill(nil)
 		}
-	}
-}
-
-func (this *taskmaster) setup() {
-	err := this.parseProperties(this.props)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if this.chSize == 0 {
-		this.ch = make(chan *LatencyEvent)
-	} else {
-		this.ch = make(chan *LatencyEvent, this.chSize)
 	}
 }
 
