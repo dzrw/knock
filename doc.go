@@ -154,7 +154,7 @@ Every 2 seconds,
 /*
   - fix the clients over goroutines bug (ACTUAL= 10 min)
 
-  - switch to 1 client per goroutine (ESTIMATED=30 min)
+  - switch to 1 client per goroutine (ESTIMATED=30 min, ACTUAL=40min)
     -- the multiplexing is unnecessary and confusing
     -- the efficiency drops anyway
     -- bad assumption that it would be faster/better than the go scheduler
@@ -166,7 +166,7 @@ Every 2 seconds,
     -- per-client latency/throughput (to check for slow/underscheduled goroutines)
 
   - finalize summary output
-    -- fix bug where the last second/final numbers aren't displayed
+    -- fix bug where the last second/final numbers aren't displayed (FIXED=5 min)
 
   - add properties for tuning internal channel buffer sizes
 */

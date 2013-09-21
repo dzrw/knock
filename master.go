@@ -134,6 +134,7 @@ func (this *master) setup() {
 }
 
 func (this *master) shutdown() {
+	this.summarize()
 	close(this.statsChan)
 }
 
