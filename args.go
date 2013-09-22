@@ -10,7 +10,7 @@ const (
 	MIN_LOAD     = 1
 )
 
-type BamConfig struct {
+type AppConfig struct {
 	Clients        int               `short:"c" long:"clients" value-name:"CLIENTS" description:"the number of individual load elements" default:"0" optional:"true"`
 	Duration       int               `short:"d" long:"duration" value-name:"SECONDS" description:"the number of seconds to run this benchmark" default:"0" optional:"true"`
 	Verbose        bool              `short:"v" long:"verbose" default:"false" optional:"true"`
@@ -21,8 +21,8 @@ type BamConfig struct {
 }
 
 // Parses the command-line arguments, and validates them.
-func parseArgs(args []string) (opts *BamConfig, err error) {
-	opts = &BamConfig{}
+func parseArgs(args []string) (opts *AppConfig, err error) {
+	opts = &AppConfig{}
 
 	_, err = goflags.ParseArgs(opts, args)
 	if err != nil {

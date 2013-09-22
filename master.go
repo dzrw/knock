@@ -20,7 +20,7 @@ type SummaryEvent struct {
 
 type master struct {
 	t         tomb.Tomb
-	conf      *BamConfig
+	conf      *AppConfig
 	t0        time.Time
 	wg        *sync.WaitGroup
 	tm        *taskmaster
@@ -29,7 +29,7 @@ type master struct {
 	statsChan chan *SummaryEvent
 }
 
-func NewMaster(conf *BamConfig) *master {
+func NewMaster(conf *AppConfig) *master {
 	wg := &sync.WaitGroup{}
 
 	return &master{

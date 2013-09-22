@@ -26,7 +26,7 @@ func main() {
 	run(conf)
 }
 
-func run(conf *BamConfig) {
+func run(conf *AppConfig) {
 	// Start the benchmark.
 	m := NewMaster(conf)
 	m.Start()
@@ -36,7 +36,7 @@ func run(conf *BamConfig) {
 }
 
 // Blocks until SIGINT or SIGTERM.
-func await(conf *BamConfig, m *master) {
+func await(conf *AppConfig, m *master) {
 	// Set up channel on which to send signal notifications.
 	// We must use a buffered channel or risk missing the signal
 	// if we're not ready to receive when the signal is sent.
@@ -66,7 +66,7 @@ func await(conf *BamConfig, m *master) {
 	}
 }
 
-func printSummary(conf *BamConfig, evt *SummaryEvent, t0 time.Time) {
+func printSummary(conf *AppConfig, evt *SummaryEvent, t0 time.Time) {
 	const format = "\015Runtime: %4.fs, Throughput (ops/sec): %8.3f, Response Time (usec): %8.3f, Efficiency (%%): %2.3f"
 	//const format2 = "%4.2f\t%.3f\t%.3f\t%.3f\n"
 

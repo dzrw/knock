@@ -51,7 +51,7 @@ type calculator struct {
 	bucket
 }
 
-func NewCalculator(conf *BamConfig, ch LatencyEventsChannel, emitter SummaryEmitter, t0 time.Time) *calculator {
+func NewCalculator(conf *AppConfig, ch LatencyEventsChannel, emitter SummaryEmitter, t0 time.Time) *calculator {
 	this := &calculator{
 		t0:          t0,
 		ch:          ch,

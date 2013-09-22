@@ -10,7 +10,7 @@ import (
 
 type PrintFunc func(format string, args ...interface{})
 
-func PrintReport(f *os.File, s Statistics, conf *BamConfig) {
+func PrintReport(f *os.File, s Statistics, conf *AppConfig) {
 	p := fmt.Fprintf
 	//p := printer(f)
 
