@@ -44,10 +44,6 @@ func await(conf *BamConfig, m *master) {
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
 
-	if conf.Verbose {
-		fmt.Fprintln(os.Stderr, "starting benchmark...\015")
-	}
-
 	for {
 		select {
 		case sig := <-ch:
@@ -60,7 +56,7 @@ func await(conf *BamConfig, m *master) {
 			}
 
 		case <-m.t.Dead():
-			printHistogram(conf, m)
+			printHistogram(m.Statistics())
 			return
 
 		case u, ok := <-m.SummaryEvents():
@@ -72,20 +68,17 @@ func await(conf *BamConfig, m *master) {
 }
 
 func printSummary(conf *BamConfig, evt *SummaryEvent, t0 time.Time) {
-	const msg = "[RUN %4ds] Throughput (ops/sec): %.3f, Response Time (usec): %.3f, Efficiency (%%): %.3f\015"
-	const gmsg = "%4d\t%.3f\t%.3f\t%.3f\n"
+	const format = "\015Runtime: %4.fs, Throughput (ops/sec): %8.3f, Response Time (usec): %8.3f, Efficiency (%%): %2.3f"
+	//const format2 = "%4.2f\t%.3f\t%.3f\t%.3f\n"
 
-	running := int(time.Since(t0).Seconds())
+	running := time.Since(t0).Seconds()
 
-	planned := conf.Clients
-	active := evt.MeanResponseTimeMs * (evt.OpsPerSecond / 1e6)
-	efficiency := active / float64(planned)
-
-	fmt.Fprintf(os.Stderr, gmsg, running, evt.OpsPerSecond, evt.MeanResponseTimeMs, efficiency)
+	fmt.Fprintf(os.Stderr, format,
+		running, evt.OpsPerSecond, evt.MeanResponseTimeMs, evt.Efficiency)
 }
 
-func printHistogram(conf *BamConfig, m *master) {
-	hist := m.Histogram()
+func printHistogram(stats Statistics) {
+	hist := stats.Histogram()
 
 	min := int64(1e9)
 	max := int64(0)

@@ -60,7 +60,7 @@ func reportProgress(m *master) {
 
 func dumpHistogram(m *master, limit int) {
 	runtime := time.Since(m.t0).Seconds()
-	hist := m.Histogram()
+	hist := m.Statistics().Histogram()
 
 	log.Printf("Response Time Histogram (limit=%d)", limit)
 	log.Print("usec,count")

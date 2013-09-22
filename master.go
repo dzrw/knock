@@ -1,14 +1,5 @@
 package main
 
-// TIME=1 HOUR (spawn slaves/observer, compute stats (avgs, ops/sec, hist))
-// master:
-// master distributes CLIENTS over slaves ("gorotines"), hands slaves a waitgroup
-// master waits on the observer to know when to proceed to reporting
-// master streams <average latency(msec), ops/sec> every 2 seconds to caller
-// master builds a histogram of latencies <msec, count>
-// master terminates out after the run completes
-//
-
 import (
 	"launchpad.net/tomb"
 	_ "log"
@@ -17,33 +8,24 @@ import (
 )
 
 type SummaryEmitter interface {
-	PublishSummaryEvent(d time.Duration, throughput, responseTime float64)
+	PublishSummaryEvent(d time.Duration, throughput, responseTime, efficiency float64)
 }
 
 type SummaryEvent struct {
 	Duration           time.Duration
 	MeanResponseTimeMs float64
 	OpsPerSecond       float64
+	Efficiency         float64
 }
 
 type master struct {
-	t     tomb.Tomb
-	conf  *BamConfig
-	t0    time.Time
-	wg    *sync.WaitGroup
-	tm    *taskmaster
-	hosts []*sandbox
-
-	// histogram
-	hist map[int64]int
-
-	// rolling stats
-	curr_lag_sum int64
-	last_lag_avg float64
-	curr_ops     int64
-	last_ops     int64
-
-	// summary events
+	t         tomb.Tomb
+	conf      *BamConfig
+	t0        time.Time
+	wg        *sync.WaitGroup
+	tm        *taskmaster
+	hosts     []*sandbox
+	stats     *calculator
 	statsChan chan *SummaryEvent
 }
 
@@ -55,7 +37,7 @@ func NewMaster(conf *BamConfig) *master {
 		wg:        wg,
 		tm:        nil,
 		hosts:     make([]*sandbox, conf.Clients),
-		hist:      make(map[int64]int),
+		stats:     nil,
 		statsChan: make(chan *SummaryEvent),
 	}
 }
@@ -73,19 +55,26 @@ func (this *master) SummaryEvents() <-chan *SummaryEvent {
 	return this.statsChan
 }
 
-func (this *master) Histogram() map[int64]int {
-	return this.hist
+func (this *master) PublishSummaryEvent(d time.Duration, throughput, responseTime, activeLoad float64) {
+	this.statsChan <- &SummaryEvent{d, responseTime, throughput, activeLoad}
+}
+
+// Only call this after the goroutine is dead.
+func (this *master) Statistics() Statistics {
+	return this.stats
 }
 
 func (this *master) loop() {
-	const ProgressInterval = 1 * time.Second
+	const (
+		ProgressInterval = 1 * time.Second
+		MaxChannelReads  = 64
+	)
 
 	defer this.t.Done()
 
 	this.setup()
 
-	rtChan := this.tm.ResponseTimes()
-	prChan := time.After(2 * time.Second)
+	prChan := time.After(ProgressInterval)
 
 	for {
 		select {
@@ -97,13 +86,13 @@ func (this *master) loop() {
 			this.t.Kill(nil)
 
 		case <-prChan:
-			this.summarize()
+			this.stats.summarize()
 			prChan = time.After(ProgressInterval)
 
 		default:
 			// Attempt to read from the channel a bunch of times
 			// between each death check.
-			this.capture(rtChan, 64)
+			this.stats.capture(MaxChannelReads)
 		}
 	}
 }
@@ -117,6 +106,10 @@ func (this *master) setup() {
 		WaitGroup:  this.wg,
 		Properties: this.conf.Properties,
 	})
+
+	// Initialize the stats recorder
+	this.stats = NewCalculator(
+		this.conf, this.tm.ResponseTimes(), this, this.t0)
 
 	// Initialize client sandboxes
 	count := this.conf.Clients
@@ -144,63 +137,6 @@ func (this *master) setup() {
 }
 
 func (this *master) shutdown() {
-	this.summarize()
+	this.stats.summarize()
 	close(this.statsChan)
-}
-
-func (this *master) capture(ch LatencyEventsChannel, reads int) {
-	hist := this.hist
-	chunk_lag := int64(0)
-	chunk_ops := int64(0)
-
-	for i := 0; i < reads; i += 1 {
-		evt, ok := <-ch
-		if !ok {
-			break
-		}
-
-		usec := evt.usec
-
-		// Update the histogram
-		if count, ok := hist[usec]; ok {
-			hist[usec] = count + 1
-		} else {
-			hist[usec] = 1
-		}
-
-		chunk_lag += usec
-		chunk_ops += 1
-	}
-
-	// Update the intermediate sums
-	this.curr_lag_sum += chunk_lag
-	this.curr_ops += chunk_ops
-}
-
-func (this *master) summarize() {
-	run_time := time.Since(this.t0)
-	next_ops := this.last_ops + this.curr_ops
-
-	// Compute the weighted average response time
-	w0 := float64(this.last_ops) / float64(next_ops)
-	w1 := float64(this.curr_ops) / float64(next_ops)
-	curr_lag_avg := float64(this.curr_lag_sum) / float64(this.curr_ops)
-	next_lag_avg := (w0 * this.last_lag_avg) + (w1 * curr_lag_avg)
-
-	// Compute the current throughput ops/sec
-	next_ops_sec := float64(next_ops) / run_time.Seconds()
-
-	// Update
-	this.last_lag_avg = next_lag_avg
-	this.last_ops = next_ops
-
-	// Reset counters
-	this.curr_lag_sum = 0
-	this.curr_ops = 0
-
-	this.PublishSummaryEvent(run_time, next_ops_sec, next_lag_avg)
-}
-
-func (this *master) PublishSummaryEvent(d time.Duration, throughput, responseTime float64) {
-	this.statsChan <- &SummaryEvent{d, responseTime, throughput}
 }
