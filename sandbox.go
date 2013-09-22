@@ -14,6 +14,7 @@ type SandboxInfo struct {
 	StartTime  time.Time
 	Emitter    LatencyEmitter
 	WaitGroup  *sync.WaitGroup
+	Factory    BehaviorFactory
 }
 
 type sandbox struct {
@@ -36,7 +37,7 @@ func NewSandbox(info *SandboxInfo) *sandbox {
 		info.Emitter,
 		info.WaitGroup,
 		nil,
-		func() Behavior { return &mgo_incr_client{} },
+		info.Factory,
 	}
 }
 

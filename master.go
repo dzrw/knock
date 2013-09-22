@@ -121,6 +121,7 @@ func (this *master) setup() {
 			StartTime:  this.t0,
 			Emitter:    this.tm,
 			WaitGroup:  this.wg,
+			Factory:    func() Behavior { return &mgo_incr_client{} },
 		}
 
 		this.hosts[i] = NewSandbox(info)
