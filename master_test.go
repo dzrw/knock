@@ -13,7 +13,7 @@ func TestMaster(t *testing.T) {
 		"-d", "10",
 		"-v",
 		"-p", "mongodb.url:mongodb://localhost:27017",
-		"-p", "mongodb.behavior:counters",
+		"-p", "mongodb.run:counters",
 	}
 
 	conf, err := parseArgs(args)

@@ -81,17 +81,17 @@ func (this *mongodb_behavior) Work() (res WorkResult) {
 }
 
 func (this *mongodb_behavior) parseProperties(props map[string]string) (err error) {
-	if v, ok := props["mongodb.behavior"]; ok {
+	if v, ok := props["mongodb.run"]; ok {
 		switch v {
 		case "counters":
 			this.mb = &mongodb_counters{}
 		// case "writeconcern":
 		// 	this.mb = &mongodb_writeconcern{}
 		default:
-			return errors.New("mongodb.behavior must be one of counters, writeconcern")
+			return errors.New("mongodb.run must be one of counters, writeconcern")
 		}
 	} else {
-		return errors.New("mongodb.behavior is a required property")
+		return errors.New("mongodb.run is a required property")
 	}
 
 	if v, ok := props["mongodb.url"]; ok {

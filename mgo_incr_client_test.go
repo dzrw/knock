@@ -18,7 +18,7 @@ func TestClientProperties(t *testing.T) {
 		return
 	}
 
-	props["mongodb.behavior"] = "counters"
+	props["mongodb.run"] = "counters"
 	props["mongodb.url"] = "bad_url_for_testing"
 
 	err = client.parseProperties(props)
@@ -115,8 +115,8 @@ func TestClientProperties(t *testing.T) {
 func TestClientDialInternals(t *testing.T) {
 	client := &mongodb_behavior{}
 	props := map[string]string{
-		"mongodb.behavior": "counters",
-		"mongodb.url":      "mongodb://localhost:27017",
+		"mongodb.run": "counters",
+		"mongodb.url": "mongodb://localhost:27017",
 	}
 
 	err := client.parseProperties(props)
@@ -141,8 +141,8 @@ func TestClientDialInternals(t *testing.T) {
 func TestClientInit(t *testing.T) {
 	client := &mongodb_behavior{}
 	props := map[string]string{
-		"mongodb.behavior": "counters",
-		"mongodb.url":      "mongodb://localhost:27017",
+		"mongodb.run": "counters",
+		"mongodb.url": "mongodb://localhost:27017",
 	}
 
 	err := client.Init(props)
@@ -170,8 +170,8 @@ func TestClientInit(t *testing.T) {
 func TestClientWork(t *testing.T) {
 	client := &mongodb_behavior{}
 	props := map[string]string{
-		"mongodb.behavior": "counters",
-		"mongodb.url":      "mongodb://localhost:27017",
+		"mongodb.run": "counters",
+		"mongodb.url": "mongodb://localhost:27017",
 	}
 
 	// Connect to mongo
