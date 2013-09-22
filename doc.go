@@ -186,5 +186,6 @@ Every 2 seconds,
   TODO
     - report the min and max response times
     - also the 5th, 95th, and 99th percentiles
+    - report these values on os.Stderr as well.
 */
 package main
