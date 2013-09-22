@@ -12,7 +12,7 @@ type Statistics interface {
 	Throughput() float64
 	MeanResponseTimeUsec() float64
 	Efficiency() float64
-	Histogram2() (dist *skiplist.SkipList, cdf *skiplist.SkipList)
+	Histogram2() (res *HistogramResult)
 
 	IsClientTrackingEnabled() (ok bool)
 	HistogramByClientId(clientId int) (hist map[int64]int, ok bool)
@@ -113,9 +113,18 @@ func (this *calculator) HistogramByClientId(clientId int) (hist map[int64]int, o
 	return bucket.hist, true
 }
 
-func (this *calculator) Histogram2() (dist *skiplist.SkipList, cdf *skiplist.SkipList) {
-	dist = skiplist.NewIntMap()
-	cdf = skiplist.NewIntMap()
+type HistogramResult struct {
+	dist         *skiplist.SkipList
+	cdf          *skiplist.SkipList
+	p5, p95, p99 int
+	min, max     int64
+}
+
+func (this *calculator) Histogram2() (res *HistogramResult) {
+	res = &HistogramResult{
+		dist: skiplist.NewIntMap(),
+		cdf:  skiplist.NewIntMap(),
+	}
 
 	min := int64(1e9)
 	max := int64(0)
@@ -136,13 +145,16 @@ func (this *calculator) Histogram2() (dist *skiplist.SkipList, cdf *skiplist.Ski
 			v[0] = freq
 		}
 
-		dist.Set(int(usec), v)
+		res.dist.Set(int(usec), v)
 	}
+
+	res.min = min
+	res.max = max
 
 	// Build the CDF.
 	sum := int64(0)
 
-	iter := dist.Iterator()
+	iter := res.dist.Iterator()
 	for iter.Next() {
 		usec := iter.Key().(int)
 		vs := iter.Value().([]int)
@@ -152,14 +164,23 @@ func (this *calculator) Histogram2() (dist *skiplist.SkipList, cdf *skiplist.Ski
 
 		v := float64(sum) / float64(this.prev_ops_sum)
 
-		cdf.Set(usec, v)
+		switch {
+		case res.p5 == 0 && v >= 0.05:
+			res.p5 = usec
+		case res.p95 == 0 && v >= 0.95:
+			res.p95 = usec
+		case res.p99 == 0 && v >= 0.99:
+			res.p99 = usec
+		}
+
+		res.cdf.Set(usec, v)
 	}
 
 	// Extend the skiplist with per-client stats, if enabled.
 	if this.IsClientTrackingEnabled() {
 		for id, bucket := range this.clients {
 			for usec, count := range bucket.hist {
-				v, ok := dist.Get(int(usec))
+				v, ok := res.dist.Get(int(usec))
 				if ok {
 					v.([]int)[id+1] = count
 				}
