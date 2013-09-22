@@ -17,13 +17,14 @@ type SandboxInfo struct {
 }
 
 type sandbox struct {
-	id      int
-	props   map[string]string
-	d       time.Duration
-	start   time.Time
-	emitter LatencyEmitter
-	wg      *sync.WaitGroup
-	client  Client
+	id       int
+	props    map[string]string
+	d        time.Duration
+	start    time.Time
+	emitter  LatencyEmitter
+	wg       *sync.WaitGroup
+	behavior Behavior
+	factory  BehaviorFactory
 }
 
 func NewSandbox(info *SandboxInfo) *sandbox {
@@ -35,6 +36,7 @@ func NewSandbox(info *SandboxInfo) *sandbox {
 		info.Emitter,
 		info.WaitGroup,
 		nil,
+		func() Behavior { return &mgo_incr_client{} },
 	}
 }
 
@@ -65,10 +67,10 @@ func (this *sandbox) setup() {
 		log.Fatal(err)
 	}
 
-	this.client = res
+	this.behavior = res
 }
 
-func (this *sandbox) init() (res Client, err error) {
+func (this *sandbox) init() (res Behavior, err error) {
 	defer func() {
 		e := recover()
 		if e != nil {
@@ -80,7 +82,7 @@ func (this *sandbox) init() (res Client, err error) {
 		return
 	}()
 
-	res = &mgo_incr_client{}
+	res = this.factory()
 	err = res.Init(this.props)
 	if err != nil {
 		return
@@ -110,7 +112,7 @@ func (this *sandbox) work() (err error) {
 	}()
 
 	t0 := time.Now()
-	res := this.client.Work()
+	res := this.behavior.Work()
 	usec := int64(time.Since(t0) / time.Microsecond)
 
 	this.emitter.PublishResponseTime(this.id, usec, res)
@@ -134,7 +136,7 @@ func (this *sandbox) close() (err error) {
 		return
 	}()
 
-	this.client.Close()
-	this.client = nil
+	this.behavior.Close()
+	this.behavior = nil
 	return
 }

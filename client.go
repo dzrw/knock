@@ -9,7 +9,9 @@ const (
 	WRK_ERROR
 )
 
-type Client interface {
+type BehaviorFactory func() Behavior
+
+type Behavior interface {
 	// Initialize any state for this client.
 	Init(props map[string]string) (err error)
 
