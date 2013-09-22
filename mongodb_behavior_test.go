@@ -1,7 +1,7 @@
 package main
 
 import (
-	"labix.org/v2/mgo/bson"
+	_ "labix.org/v2/mgo/bson"
 	_ "log"
 	_ "strconv"
 	"testing"

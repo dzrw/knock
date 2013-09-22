@@ -85,10 +85,10 @@ func (this *mongodb_behavior) parseProperties(props map[string]string) (err erro
 		switch v {
 		case "counters":
 			this.mb = &mongodb_counters{}
-		// case "writeconcern":
-		// 	this.mb = &mongodb_writeconcern{}
+		case "writes":
+			this.mb = &mongodb_writes{}
 		default:
-			return errors.New("mongodb.run must be one of counters, writeconcern")
+			return errors.New("mongodb.run must be one of counters, writes")
 		}
 	} else {
 		return errors.New("mongodb.run is a required property")
