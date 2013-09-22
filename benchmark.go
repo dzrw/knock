@@ -10,6 +10,11 @@ import (
 )
 
 func RunBenchmark(conf *AppConfig, factory BehaviorFactory) {
+	if conf.Version {
+		printVersion()
+		return
+	}
+
 	// Schedule all of the logical cores.
 	runtime.GOMAXPROCS(runtime.NumCPU())
 

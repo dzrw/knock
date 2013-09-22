@@ -16,6 +16,7 @@ type AppConfig struct {
 	Verbose        bool              `short:"v" long:"verbose" default:"false" optional:"true"`
 	PerClientStats bool              `long:"client-stats" default:"false" optional:"true" description:"whether or not to track individual client statistics"`
 	Properties     map[string]string `short:"p" description:"additional properties" optional:"true"`
+	Version        bool              `long:"version" optional:"true" default:"false" description:"display version information"`
 
 	d time.Duration
 }

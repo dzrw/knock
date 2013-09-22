@@ -12,6 +12,7 @@ func TestParseArguments(t *testing.T) {
 		"-p", "a:1",
 		"-p", "b:2",
 		"--client-stats",
+		"--version",
 	}
 
 	opts, err := parseArgs(args)
@@ -33,6 +34,10 @@ func TestParseArguments(t *testing.T) {
 	}
 
 	if !expectBool(t, true, opts.PerClientStats) {
+		return
+	}
+
+	if !expectBool(t, true, opts.Version) {
 		return
 	}
 
@@ -86,6 +91,10 @@ func TestDefaultValuesOfArguments(t *testing.T) {
 	}
 
 	if !expectBool(t, false, opts.PerClientStats) {
+		return
+	}
+
+	if !expectBool(t, false, opts.Version) {
 		return
 	}
 

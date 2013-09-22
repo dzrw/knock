@@ -125,3 +125,9 @@ func wash(usec int) string {
 		return fmt.Sprintf("%.3fs", float64(usec)/1e6)
 	}
 }
+
+func printVersion() {
+	const format = "knock version %s"
+	fmt.Fprintf(os.Stdout, format, VERSION)
+	fmt.Fprintf(os.Stdout, "\n")
+}
