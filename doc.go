@@ -160,12 +160,22 @@ Every 2 seconds,
     -- bad assumption that it would be faster/better than the go scheduler
 
   - finalize the generated reports
-    -- latency histogram
-    -- runtime/latency/throughput/planned load/active load
-    -- throughput vs latency (XR curve)
-    -- per-client latency/throughput (to check for slow/underscheduled goroutines)
+    -- move stats tracking out of master (ACTUAL=1 HOUR)
 
-  - finalize summary output
+    -- runtime/latency/throughput/planned load/active load (ACTUAL=30 min)
+      -- This is summary stats written to stdout at the end of the round.
+      -- might want to include conf details
+      -- this is like the header of the report
+
+    -- latency histogram (ACTUAL=30 min)
+      -- One column per client id if tracking per client stats
+      -- First column is overall
+
+    -- throughput vs latency (XR curve) (PUNTED)
+          -- Nope. This only makes sense if you've got multiple rounds.
+             We've only got 1 round currently.
+
+  - finalize summary output (ACTUAL=20 MIN)
     -- fix bug where the last second/final numbers aren't displayed (FIXED=5 min)
 
   - add properties for tuning internal channel buffer sizes (ACTUAL=30 min)

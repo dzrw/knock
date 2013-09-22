@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/ryszard/goskiplist/skiplist"
 	"time"
 )
 
@@ -10,6 +11,8 @@ type Statistics interface {
 	Histogram() (hist map[int64]int)
 	Throughput() float64
 	MeanResponseTimeUsec() float64
+	Efficiency() float64
+	Histogram2() *skiplist.SkipList
 
 	IsClientTrackingEnabled() (ok bool)
 	HistogramByClientId(clientId int) (hist map[int64]int, ok bool)
@@ -88,6 +91,15 @@ func (this *calculator) MeanResponseTimeUsec() float64 {
 	return this.prev_lag_avg
 }
 
+func (this *calculator) Efficiency() float64 {
+	throughput := this.Throughput()
+	responseTime := this.MeanResponseTimeUsec()
+	active_load := responseTime * (throughput / 1e6)
+	planned_load := float64(this.clientCount)
+	efficiency := active_load / planned_load
+	return efficiency
+}
+
 func (this *calculator) IsClientTrackingEnabled() bool {
 	return this.clientStats
 }
@@ -100,6 +112,51 @@ func (this *calculator) HistogramByClientId(clientId int) (hist map[int64]int, o
 
 	return bucket.hist, true
 }
+
+func (this *calculator) Histogram2() *skiplist.SkipList {
+	l := skiplist.NewIntMap()
+
+	min := int64(1e9)
+	max := int64(0)
+
+	for usec, total := range this.hist {
+		if usec < min {
+			min = usec
+		}
+
+		if usec > max {
+			max = usec
+		}
+
+		v := []int{total}
+		if this.IsClientTrackingEnabled() {
+			v = make([]int, this.clientCount+1)
+			v[0] = total
+		}
+
+		l.Set(int(usec), v)
+	}
+
+	if this.IsClientTrackingEnabled() {
+		for id, bucket := range this.clients {
+			for usec, count := range bucket.hist {
+				v, ok := l.Get(int(usec))
+				if ok {
+					v.([]int)[id+1] = count
+				}
+			}
+		}
+	}
+
+	return l
+}
+
+// func concat(old1, old2 []int) []int {
+// 	newslice := make([]int, len(old1)+len(old2))
+// 	copy(newslice, old1)
+// 	copy(newslice[len(old1):], old2)
+// 	return newslice
+// }
 
 func (this *calculator) capture(count int) {
 	ch := this.ch

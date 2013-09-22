@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/ryszard/goskiplist/skiplist"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -56,7 +55,7 @@ func await(conf *BamConfig, m *master) {
 			}
 
 		case <-m.t.Dead():
-			printHistogram(m.Statistics())
+			PrintReport(os.Stdout, m.Statistics(), conf)
 			return
 
 		case u, ok := <-m.SummaryEvents():
@@ -75,39 +74,4 @@ func printSummary(conf *BamConfig, evt *SummaryEvent, t0 time.Time) {
 
 	fmt.Fprintf(os.Stderr, format,
 		running, evt.OpsPerSecond, evt.MeanResponseTimeMs, evt.Efficiency)
-}
-
-func printHistogram(stats Statistics) {
-	hist := stats.Histogram()
-
-	min := int64(1e9)
-	max := int64(0)
-
-	l := skiplist.NewIntMap()
-
-	for usec, count := range hist {
-		if usec < min {
-			min = usec
-		}
-
-		if usec > max {
-			max = usec
-		}
-
-		l.Set(int(usec), int(count))
-	}
-
-	fmt.Fprintf(os.Stdout, "Response Time Histogram\n\n")
-	fmt.Fprintf(os.Stdout, "usec\tcount\n")
-	fmt.Fprintf(os.Stdout, "----\t-----\n\n")
-
-	iter := l.Iterator()
-	for iter.Next() {
-		k := iter.Key().(int)
-		v := iter.Value().(int)
-
-		fmt.Fprintf(os.Stdout, "%d\t%d\n", k, v)
-	}
-
-	fmt.Fprintf(os.Stdout, "min: %d, max: %d, unique: %d", min, max, len(hist))
 }
