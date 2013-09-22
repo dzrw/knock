@@ -27,9 +27,10 @@ type master struct {
 	hosts     []*sandbox
 	stats     *calculator
 	statsChan chan *SummaryEvent
+	factory   BehaviorFactory
 }
 
-func NewMaster(conf *AppConfig) *master {
+func NewMaster(conf *AppConfig, factory BehaviorFactory) *master {
 	wg := &sync.WaitGroup{}
 
 	return &master{
@@ -39,6 +40,7 @@ func NewMaster(conf *AppConfig) *master {
 		hosts:     make([]*sandbox, conf.Clients),
 		stats:     nil,
 		statsChan: make(chan *SummaryEvent),
+		factory:   factory,
 	}
 }
 
@@ -121,7 +123,7 @@ func (this *master) setup() {
 			StartTime:  this.t0,
 			Emitter:    this.tm,
 			WaitGroup:  this.wg,
-			Factory:    func() Behavior { return &mgo_incr_client{} },
+			Factory:    this.factory,
 		}
 
 		this.hosts[i] = NewSandbox(info)

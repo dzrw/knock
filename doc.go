@@ -181,4 +181,10 @@ Every 2 seconds,
   - add properties for tuning internal channel buffer sizes (ACTUAL=30 min)
     -- specifically, the taskmaster's LatencyEventChannel.
 */
+
+/*
+  TODO
+    - report the min and max response times
+    - also the 5th, 95th, and 99th percentiles
+*/
 package main
