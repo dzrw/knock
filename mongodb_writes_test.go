@@ -48,6 +48,18 @@ func TestMongoDbWritesProperties(t *testing.T) {
 	if !expectInt(t, MONGO_DEFAULT_DOCUMENT_LENGTH, mode.doc_length) {
 		return
 	}
+
+	props["mongodb.doc_length"] = "1024"
+
+	err = mode.parseProperties(props)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !expectInt(t, 1024, mode.doc_length) {
+		return
+	}
 }
 
 func TestMongoDbWritesInit(t *testing.T) {
@@ -72,6 +84,36 @@ func TestMongoDbWritesInit(t *testing.T) {
 
 	const content = "I wrote some Go!"
 	if !expectString(t, content, mode.doc_data) {
+		return
+	}
+}
+
+func TestMongoDbWritesInit1024(t *testing.T) {
+	b := &mongodb_behavior{}
+	props := map[string]string{
+		"mongodb.run":        "writes",
+		"mongodb.url":        "mongodb://localhost:27017",
+		"mongodb.doc_length": "1024",
+	}
+
+	err := b.Init(props)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	defer b.Close()
+
+	mode, ok := b.mb.(*mongodb_writes)
+	if !expectBool(t, true, ok) {
+		return
+	}
+
+	if !expectInt(t, 1024, mode.doc_length) {
+		return
+	}
+
+	if !expectInt(t, 1024, len(mode.doc_data)) {
 		return
 	}
 }

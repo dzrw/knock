@@ -81,6 +81,8 @@ func (this *mongodb_behavior) Work() (res WorkResult) {
 }
 
 func (this *mongodb_behavior) parseProperties(props map[string]string) (err error) {
+	this.properties = props
+
 	if v, ok := props["mongodb.run"]; ok {
 		switch v {
 		case "counters":

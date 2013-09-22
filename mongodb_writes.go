@@ -4,6 +4,7 @@ import (
 	"errors"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
+	_ "log"
 	"strconv"
 	"strings"
 )
@@ -63,14 +64,10 @@ func (this *mongodb_writes) insert_document() (err error) {
 }
 
 func (this *mongodb_writes) document_data() string {
-	const (
-		fudge = 42
-	)
-
 	if this.doc_length == MONGO_MIN_DOCUMENT_LENGTH {
 		return "I wrote some Go!" // should be exactly 64 bytes total now.
 	} else {
-		return strings.Repeat("x", this.doc_length-fudge)
+		return strings.Repeat("x", this.doc_length)
 	}
 }
 
