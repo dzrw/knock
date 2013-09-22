@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -54,14 +53,4 @@ func await(conf *AppConfig, m *master) {
 			}
 		}
 	}
-}
-
-func printSummary(conf *AppConfig, evt *SummaryEvent, t0 time.Time) {
-	const format = "\015Runtime: %4.fs, Throughput (ops/sec): %8.3f, Response Time (usec): %8.3f, Efficiency (%%): %2.3f"
-	//const format2 = "%4.2f\t%.3f\t%.3f\t%.3f\n"
-
-	running := time.Since(t0).Seconds()
-
-	fmt.Fprintf(os.Stderr, format,
-		running, evt.OpsPerSecond, evt.MeanResponseTimeMs, evt.Efficiency)
 }

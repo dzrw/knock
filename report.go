@@ -96,6 +96,16 @@ func PrintReport(f *os.File, s Statistics, conf *AppConfig) {
 	p(f, "\n")
 }
 
+func printSummary(conf *AppConfig, evt *SummaryEvent, t0 time.Time) {
+	const format = "\015Runtime: %4.fs, Throughput (ops/sec): %8.3f, Response Time (μs): %8.3f, Efficiency (%%): %2.3f"
+	//const format2 = "%4.2f\t%.3f\t%.3f\t%.3f\n"
+
+	running := time.Since(t0).Seconds()
+
+	fmt.Fprintf(os.Stderr, format,
+		running, evt.OpsPerSecond, evt.MeanResponseTimeMs, evt.Efficiency)
+}
+
 func printSummaryTrailer(f *os.File, s Statistics, res *HistogramResult) {
 	p := fmt.Fprintf
 
