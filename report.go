@@ -37,7 +37,7 @@ func PrintReport(f *os.File, s Statistics, conf *BamConfig) {
 	p(f, "---------------------------------\n")
 	p(f, "\n")
 
-	headers := []string{"usec", "total"}
+	headers := []string{"usec", "CDF", "total"}
 	if s.IsClientTrackingEnabled() {
 		for i := 0; i < conf.Clients; i++ {
 			headers = append(headers, fmt.Sprintf("client-%d", i))
@@ -54,16 +54,21 @@ func PrintReport(f *os.File, s Statistics, conf *BamConfig) {
 	p(f, "\n")
 	p(f, strings.Join(spacers, "\t"))
 
-	iter := s.Histogram2().Iterator()
+	dist, cdf := s.Histogram2()
+
+	iter := dist.Iterator()
 	for iter.Next() {
 		usec := iter.Key().(int)
 		vs := iter.Value().([]int)
 
-		row := make([]string, len(vs)+1)
+		cdfi, _ := cdf.Get(usec)
+
+		row := make([]string, len(vs)+2)
 		row[0] = strconv.Itoa(usec)
+		row[1] = fmt.Sprintf("%2.6f", cdfi.(float64))
 
 		for i, v := range vs {
-			row[i+1] = strconv.Itoa(v)
+			row[i+2] = strconv.Itoa(v)
 		}
 
 		p(f, "\n")
