@@ -28,6 +28,7 @@ func TestSandbox(t *testing.T) {
 		StartTime: t0,
 		Emitter:   tm,
 		WaitGroup: wg,
+		Factory:   func() Behavior { return &mgo_incr_client{} },
 	})
 
 	sb.Start()

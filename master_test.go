@@ -23,7 +23,7 @@ func TestMaster(t *testing.T) {
 
 	log.Printf("Running a %d second test...", conf.Duration)
 
-	m := NewMaster(conf)
+	m := NewMaster(conf, func() Behavior { return &mgo_incr_client{} })
 	m.Start()
 
 	reportProgress(m)
