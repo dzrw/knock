@@ -38,6 +38,10 @@ func TestClientInit(t *testing.T) {
 }
 
 func TestClientWork(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
 	client := &mongodb_behavior{}
 	props := map[string]string{
 		"mongodb.run": "counters",

@@ -8,6 +8,10 @@ import (
 )
 
 func TestSandbox(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
 	t0 := time.Now()
 
 	wg := &sync.WaitGroup{}

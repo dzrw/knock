@@ -3,14 +3,23 @@ package main
 import (
 	_ "log"
 	"log"
+	"strconv"
 	"testing"
 	"time"
 )
 
 func TestMaster(t *testing.T) {
+	const (
+		RunTime = 15
+	)
+
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
 	args := []string{
 		"-c", "8",
-		"-d", "10",
+		"-d", strconv.Itoa(RunTime),
 		"-v",
 		"-p", "mongodb.url:mongodb://localhost:27017",
 		"-p", "mongodb.run:counters",
@@ -29,10 +38,10 @@ func TestMaster(t *testing.T) {
 
 	reportProgress(m)
 
-	dumpHistogram(m, 10)
+	dumpHistogram(m, RunTime)
 
-	if time.Since(m.t0) < (10 * time.Second) {
-		t.Errorf("This test should have taken at least %d seconds.", 10)
+	if time.Since(m.t0) < (RunTime * time.Second) {
+		t.Errorf("This test should have taken at least %d seconds.", RunTime)
 		return
 	}
 }
