@@ -13,6 +13,7 @@ func TestMaster(t *testing.T) {
 		"-d", "10",
 		"-v",
 		"-p", "mongodb.url:mongodb://localhost:27017",
+		"-p", "mongodb.behavior:counters",
 	}
 
 	conf, err := parseArgs(args)
@@ -23,7 +24,7 @@ func TestMaster(t *testing.T) {
 
 	log.Printf("Running a %d second test...", conf.Duration)
 
-	m := NewMaster(conf, func() Behavior { return &mgo_incr_client{} })
+	m := NewMaster(conf, func() Behavior { return &mongodb_behavior{} })
 	m.Start()
 
 	reportProgress(m)

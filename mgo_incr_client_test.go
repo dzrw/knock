@@ -9,7 +9,7 @@ import (
 )
 
 func TestClientProperties(t *testing.T) {
-	client := &mgo_incr_client{}
+	client := &mongodb_behavior{}
 	props := make(map[string]string)
 
 	err := client.parseProperties(props)
@@ -18,6 +18,7 @@ func TestClientProperties(t *testing.T) {
 		return
 	}
 
+	props["mongodb.behavior"] = "counters"
 	props["mongodb.url"] = "bad_url_for_testing"
 
 	err = client.parseProperties(props)
@@ -112,9 +113,10 @@ func TestClientProperties(t *testing.T) {
 }
 
 func TestClientDialInternals(t *testing.T) {
-	client := &mgo_incr_client{}
+	client := &mongodb_behavior{}
 	props := map[string]string{
-		"mongodb.url": "mongodb://localhost:27017",
+		"mongodb.behavior": "counters",
+		"mongodb.url":      "mongodb://localhost:27017",
 	}
 
 	err := client.parseProperties(props)
@@ -137,9 +139,10 @@ func TestClientDialInternals(t *testing.T) {
 }
 
 func TestClientInit(t *testing.T) {
-	client := &mgo_incr_client{}
+	client := &mongodb_behavior{}
 	props := map[string]string{
-		"mongodb.url": "mongodb://localhost:27017",
+		"mongodb.behavior": "counters",
+		"mongodb.url":      "mongodb://localhost:27017",
 	}
 
 	err := client.Init(props)
@@ -150,8 +153,9 @@ func TestClientInit(t *testing.T) {
 
 	defer client.Close()
 
+	docid := client.mb.(*mongodb_counters).deadbeef_id
 	coll := client.s.DB(client.db).C(client.collectionName)
-	query := coll.FindId(client.deadbeef_id)
+	query := coll.FindId(docid)
 
 	n, err := query.Count()
 	if !expectOk(t, err) {
@@ -164,9 +168,10 @@ func TestClientInit(t *testing.T) {
 }
 
 func TestClientWork(t *testing.T) {
-	client := &mgo_incr_client{}
+	client := &mongodb_behavior{}
 	props := map[string]string{
-		"mongodb.url": "mongodb://localhost:27017",
+		"mongodb.behavior": "counters",
+		"mongodb.url":      "mongodb://localhost:27017",
 	}
 
 	// Connect to mongo
@@ -186,8 +191,9 @@ func TestClientWork(t *testing.T) {
 		AccountId string        `bson:"account_id"`
 	}
 
+	docid := client.mb.(*mongodb_counters).deadbeef_id
 	coll := client.s.DB(client.db).C(client.collectionName)
-	err = coll.FindId(client.deadbeef_id).One(&res)
+	err = coll.FindId(docid).One(&res)
 	if !expectOk(t, err) {
 		return
 	}
@@ -205,7 +211,7 @@ func TestClientWork(t *testing.T) {
 	}
 
 	// Check that the total has increased by the same amount
-	err = coll.FindId(client.deadbeef_id).One(&res)
+	err = coll.FindId(docid).One(&res)
 	if !expectOk(t, err) {
 		return
 	}

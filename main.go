@@ -13,6 +13,6 @@ func main() {
 
 	// Run the benchmark with our own custom behavior.
 	RunBenchmark(conf, func() Behavior {
-		return &mgo_incr_client{}
+		return &mongodb_behavior{}
 	})
 }

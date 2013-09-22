@@ -22,13 +22,14 @@ func TestSandbox(t *testing.T) {
 	sb := NewSandbox(&SandboxInfo{
 		Id: 1,
 		Properties: map[string]string{
-			"mongodb.url": "mongodb://localhost:27017",
+			"mongodb.behavior": "counters",
+			"mongodb.url":      "mongodb://localhost:27017",
 		},
 		Duration:  15 * time.Second,
 		StartTime: t0,
 		Emitter:   tm,
 		WaitGroup: wg,
-		Factory:   func() Behavior { return &mgo_incr_client{} },
+		Factory:   func() Behavior { return &mongodb_behavior{} },
 	})
 
 	sb.Start()
