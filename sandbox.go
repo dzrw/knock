@@ -177,13 +177,13 @@ func (this *sandbox) parseProperties() (err error) {
 	props := this.props
 
 	const (
-		MinOpsPerStall = 10000
+		MinOpsPerStall = 100
 	)
 
 	if v, ok := props["internals.OpsPerStall"]; ok {
 		u, err := strconv.Atoi(v)
 		if err != nil || u < MinOpsPerStall {
-			return errors.New("internals.OpsPerStall must be >= 10000 ops (e.g. don't use this option when response times are slow enough to measure)")
+			return errors.New("internals.OpsPerStall must be >= 100 ops")
 		}
 
 		this.stall = true
