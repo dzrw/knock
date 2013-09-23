@@ -4,7 +4,7 @@ import (
 	"errors"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
-	_ "log"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -43,10 +43,12 @@ func (this *mongodb_writes) Work() (res WorkResult) {
 	err := this.insert_document()
 	switch {
 	case err != nil:
-		return WRK_ERROR
+		log.Fatalf("writes: %+v", err)
 	default:
-		return WRK_OK
+		res = WRK_OK
 	}
+
+	return
 }
 
 func (this *mongodb_writes) insert_document() (err error) {

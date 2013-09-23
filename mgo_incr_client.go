@@ -3,6 +3,7 @@ package main
 import (
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
+	"log"
 )
 
 type mongodb_counters struct {
@@ -28,15 +29,23 @@ func (this *mongodb_counters) Close() {
 }
 
 func (this *mongodb_counters) Work() (res WorkResult) {
-	updated, err := this.increment_and_set_deadbeef()
+	doc := M{"$inc": M{"total": 1}, "$set": M{"account_id": "test_1"}}
+	doc["$inc"].(M)[this.randomFieldName()] = 1
+
+	info, err := this.collection().Upsert(M{"stream_id": "deadbeef"}, doc)
+
 	switch {
 	case err != nil:
-		return WRK_ERROR
-	case updated != 1:
-		return WRK_WTF
+		log.Fatalf("counters: %+v", err)
+	case info != nil:
+		res = WRK_OK
+	case this.conf.writeConcern == -1:
+		res = WRK_OK
 	default:
-		return WRK_OK
+		res = WRK_WTF
 	}
+
+	return
 }
 
 func (this *mongodb_counters) plant_deadbeef_document() (err error) {
@@ -58,19 +67,6 @@ func (this *mongodb_counters) plant_deadbeef_document() (err error) {
 	}
 
 	this.deadbeef_id = res.Id
-	return
-}
-
-func (this *mongodb_counters) increment_and_set_deadbeef() (updated int, err error) {
-	doc := M{"$inc": M{"total": 1}, "$set": M{"account_id": "test_1"}}
-	doc["$inc"].(M)[this.randomFieldName()] = 1
-
-	info, err := this.collection().Upsert(M{"stream_id": "deadbeef"}, doc)
-	if err != nil {
-		return
-	}
-
-	updated = info.Updated
 	return
 }
 
