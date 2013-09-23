@@ -271,9 +271,7 @@ func (this *calculator) summarize() {
 	next_ops_per_sec := float64(next_ops_sum) / d.Seconds()
 
 	// Compute the active load and load efficiency
-	active_load := next_lag_avg * (next_ops_per_sec / 1e6)
-	planned_load := float64(this.clientCount)
-	efficiency := active_load / planned_load
+	eff := efficiency(this.clientCount, next_ops_per_sec, next_lag_avg)
 
 	// Update
 	this.prev_lag_avg = next_lag_avg
@@ -283,6 +281,12 @@ func (this *calculator) summarize() {
 	this.curr_lag_sum = 0
 	this.curr_ops_sum = 0
 
-	this.emitter.PublishSummaryEvent(
-		d, next_ops_per_sec, next_lag_avg, efficiency)
+	this.emitter.PublishSummaryEvent(d, next_ops_per_sec, next_lag_avg, eff)
+}
+
+func efficiency(load int, throughput, responseTimeUs float64) float64 {
+	active_load := responseTimeUs * (throughput / 1e6)
+	planned_load := float64(load)
+	efficiency := active_load / planned_load
+	return efficiency
 }
