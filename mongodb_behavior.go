@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
+	_ "log"
 	"math/rand"
 	"strconv"
 )
@@ -109,12 +110,16 @@ func (this *mongodb_behavior) parseProperties(props map[string]string) (err erro
 	}
 
 	if v, ok := props["mongodb.writeConcern"]; ok {
-		w, err := strconv.Atoi(v)
-		if err != nil || w < 0 {
-			return errors.New("mongodb.writeConcern must be >= 0")
+		switch v {
+		case "none":
+			this.writeConcern = -1
+		case "w=0":
+			this.writeConcern = 0
+		case "w=1":
+			this.writeConcern = 1
+		default:
+			return errors.New("mongodb.writeConcern must be one of none, w=0, w=1")
 		}
-
-		this.writeConcern = w
 	} else {
 		this.writeConcern = DEFAULT_MONGO_WRITE_CONCERN
 	}
@@ -141,7 +146,16 @@ func (this *mongodb_behavior) dial() (err error) {
 	}
 
 	this.s = session
-	this.s.SetSafe(&mgo.Safe{W: this.writeConcern})
+
+	var safe *mgo.Safe
+	switch {
+	case this.writeConcern == -1:
+		safe = nil
+	case this.writeConcern >= 0:
+		safe = &mgo.Safe{W: this.writeConcern}
+	}
+
+	this.s.SetSafe(safe)
 	return
 }
 
