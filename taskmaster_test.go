@@ -40,6 +40,10 @@ func countResponseTimes(tm *taskmaster) (count int) {
 }
 
 func TestTaskMaster(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
+
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 
