@@ -113,7 +113,7 @@ func (this *sandbox) work() (err error) {
 	}()
 
 	t0 := time.Now()
-	res := this.behavior.Work()
+	res := this.behavior.Work(t0)
 	usec := int64(time.Since(t0) / time.Microsecond)
 
 	this.emitter.PublishResponseTime(this.id, usec, res)

@@ -5,7 +5,7 @@ import (
 	_ "log"
 	"strconv"
 	"testing"
-	_ "time"
+	"time"
 )
 
 func TestMongoDbWritesProperties(t *testing.T) {
@@ -148,7 +148,7 @@ func TestMongoDbWritesWork(t *testing.T) {
 
 	// Do several units of work
 	for i := 0; i < 20; i += 1 {
-		wr := b.Work()
+		wr := b.Work(time.Now())
 		if wr != WRK_OK {
 			t.Errorf("expected: WRK_OK, got: %v", wr)
 			return

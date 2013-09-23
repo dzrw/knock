@@ -1,5 +1,9 @@
 package main
 
+import (
+	"time"
+)
+
 type WorkResult int
 
 const (
@@ -19,5 +23,5 @@ type Behavior interface {
 	Close()
 
 	// Perform one unit of work.
-	Work() (res WorkResult)
+	Work(t0 time.Time) (res WorkResult)
 }

@@ -8,6 +8,7 @@ import (
 	_ "log"
 	"math/rand"
 	"strconv"
+	"time"
 )
 
 const (
@@ -77,7 +78,7 @@ func (this *mongodb_behavior) Close() {
 	this.mb.Close()
 }
 
-func (this *mongodb_behavior) Work() (res WorkResult) {
+func (this *mongodb_behavior) Work(t0 time.Time) (res WorkResult) {
 	return this.mb.Work()
 }
 

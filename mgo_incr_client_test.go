@@ -5,7 +5,7 @@ import (
 	_ "log"
 	_ "strconv"
 	"testing"
-	_ "time"
+	"time"
 )
 
 func TestClientInit(t *testing.T) {
@@ -77,7 +77,7 @@ func TestClientWork(t *testing.T) {
 	// Do several units of work
 	var wr WorkResult
 	for i := 0; i < 20; i += 1 {
-		wr = client.Work()
+		wr = client.Work(time.Now())
 		if wr != WRK_OK {
 			t.Errorf("expected: WRK_OK, got: %v", wr)
 			return
