@@ -108,7 +108,10 @@ func (this *sandbox) expired() (ok bool) {
 }
 
 func (this *sandbox) update() {
-	_ = this.work()
+	err := this.work()
+	if err != nil {
+		log.Fatalf("behavior panic during Work: %+v", err)
+	}
 }
 
 func (this *sandbox) work() (err error) {
