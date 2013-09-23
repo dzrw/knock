@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/ryszard/goskiplist/skiplist"
+	_ "log"
+	"math"
 	"time"
 )
 
@@ -254,6 +256,16 @@ func (this *calculator) summarize() {
 	w1 := float64(this.curr_ops_sum) / float64(next_ops_sum)
 	curr_lag_avg := float64(this.curr_lag_sum) / float64(this.curr_ops_sum)
 	next_lag_avg := (w0 * this.prev_lag_avg) + (w1 * curr_lag_avg)
+
+	// TODO: I think w1 is underflowing, but I don't have time to
+	// check right now.  Instead, since this only seems to happen
+	// towards the end of the run with really fast work units,
+	// we'll just stop updating these variables (and emit the same
+	// summaries).
+	if math.IsNaN(next_lag_avg) {
+		next_ops_sum = this.prev_ops_sum
+		next_lag_avg = this.prev_lag_avg
+	}
 
 	// Compute the current throughput ops/sec
 	next_ops_per_sec := float64(next_ops_sum) / d.Seconds()
