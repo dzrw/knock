@@ -88,6 +88,12 @@ func (this *calculator) Throughput() float64 {
 }
 
 func (this *calculator) MeanResponseTimeUsec() float64 {
+	const EPSILON = float64(1*time.Microsecond) / 10
+
+	if this.prev_lag_avg < EPSILON {
+		return EPSILON
+	}
+
 	return this.prev_lag_avg
 }
 
