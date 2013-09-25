@@ -10,11 +10,11 @@ import (
 type Statistics interface {
 	StartTime() time.Time
 
-	Histogram() (hist map[int64]int)
 	Throughput() float64
 	MeanResponseTimeUsec() float64
 	Efficiency() float64
 	Histogram2() (res *HistogramResult)
+	Errors() map[WorkResult]int
 
 	IsClientTrackingEnabled() (ok bool)
 	HistogramByClientId(clientId int) (hist map[int64]int, ok bool)
@@ -49,6 +49,7 @@ type calculator struct {
 	clients     map[int]*bucket
 	clientStats bool
 	clientCount int
+	errors      map[WorkResult]int
 
 	bucket
 }
@@ -61,6 +62,7 @@ func NewCalculator(conf *AppConfig, ch LatencyEventsChannel, emitter SummaryEmit
 		clients:     nil,
 		clientCount: conf.Clients,
 		clientStats: conf.PerClientStats,
+		errors:      make(map[WorkResult]int),
 		bucket: bucket{
 			id:   -1,
 			hist: make(map[int64]int),
@@ -81,8 +83,8 @@ func (this *calculator) StartTime() time.Time {
 	return this.t0
 }
 
-func (this *calculator) Histogram() map[int64]int {
-	return this.hist
+func (this *calculator) Errors() map[WorkResult]int {
+	return this.errors
 }
 
 func (this *calculator) Throughput() float64 {
@@ -126,6 +128,7 @@ type HistogramResult struct {
 	cdf          *skiplist.SkipList
 	p5, p95, p99 int
 	min, max     int64
+	errors       map[WorkResult]int
 }
 
 func (this *calculator) Histogram2() (res *HistogramResult) {
@@ -219,6 +222,17 @@ func (this *calculator) capture(count int) {
 		evt, ok := <-ch
 		if !ok {
 			break
+		}
+
+		// Count errors, but don't pollute the ops counter.
+		if evt.result != WRK_OK {
+			if v, ok := this.errors[evt.result]; ok {
+				this.errors[evt.result] = v + 1
+			} else {
+				this.errors[evt.result] = 1
+			}
+
+			continue
 		}
 
 		usec := evt.usec

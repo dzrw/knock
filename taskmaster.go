@@ -17,8 +17,9 @@ type LatencyEmitter interface {
 }
 
 type LatencyEvent struct {
-	id   int
-	usec int64
+	id     int
+	usec   int64
+	result WorkResult
 }
 
 type LatencyEventsChannel <-chan *LatencyEvent
@@ -72,7 +73,7 @@ func (this *taskmaster) ResponseTimes() LatencyEventsChannel {
 }
 
 func (this *taskmaster) PublishResponseTime(clientId int, latency int64, res WorkResult) {
-	this.ch <- &LatencyEvent{clientId, latency}
+	this.ch <- &LatencyEvent{clientId, latency, res}
 }
 
 func (this *taskmaster) loop() {

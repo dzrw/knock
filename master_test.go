@@ -38,8 +38,6 @@ func TestMaster(t *testing.T) {
 
 	reportProgress(m)
 
-	dumpHistogram(m, RunTime)
-
 	if time.Since(m.t0) < (RunTime * time.Second) {
 		t.Errorf("This test should have taken at least %d seconds.", RunTime)
 		return
@@ -66,37 +64,4 @@ func reportProgress(m *master) {
 				u.MeanResponseTimeMs, u.OpsPerSecond, efficiency)
 		}
 	}
-}
-
-func dumpHistogram(m *master, limit int) {
-	runtime := time.Since(m.t0).Seconds()
-	hist := m.Statistics().Histogram()
-
-	log.Printf("Response Time Histogram (limit=%d)", limit)
-	log.Print("usec,count")
-
-	min := int64(1000000)
-	max := int64(0)
-
-	ops := int64(0)
-
-	for usec, c := range hist {
-		limit -= 1
-		if limit >= 0 {
-			log.Printf("%d,%d", usec, c)
-		}
-
-		if usec < min {
-			min = usec
-		}
-
-		if usec > max {
-			max = usec
-		}
-
-		ops += int64(c)
-	}
-
-	log.Printf("min (usec): %d, max (usec): %d, unique: %d", min, max, len(hist))
-	log.Printf("ops/sec: %.3f", float64(ops)/runtime)
 }

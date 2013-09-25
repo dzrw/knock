@@ -41,6 +41,7 @@ func PrintReport(f *os.File, s Statistics, conf *AppConfig) {
 	p(f, "Throughput (ops/sec):\t%f\n", s.Throughput())
 	p(f, "Mean Response Time (μs):\t%8.4f\n", s.MeanResponseTimeUsec())
 	p(f, "Load Efficiency (%%):\t%f\n", s.Efficiency())
+	p(f, "Errors: %d\n", s.Errors()[WRK_ERROR])
 	p(f, "\n")
 
 	p(f, "Response Time Details:\n")
@@ -110,8 +111,9 @@ func printSummaryTrailer(f *os.File, s Statistics, res *HistogramResult) {
 	p := fmt.Fprintf
 
 	p(f, "\n")
-	p(f, "Time's up! Fastest: %s, Percentiles: [5th: %s, 95th: %s, 99th: %s], Slowest: %s",
-		wash(int(res.min)), wash(res.p5), wash(res.p95), wash(res.p99), wash(int(res.max)))
+	p(f, "Time's up! Errors: %d, Fastest: %s, Percentiles: [5th: %s, 95th: %s, 99th: %s], Slowest: %s",
+		s.Errors()[WRK_ERROR], wash(int(res.min)), wash(res.p5), wash(res.p95), wash(res.p99), wash(int(res.max)))
+
 	p(f, "\n")
 }
 
