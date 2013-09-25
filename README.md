@@ -3,16 +3,30 @@ knock
 
 A tool for measuring the throughput and response time of an arbitrary function (typically, a network request).  A *benchmark* library written in Go.
 
+### Usage
+
+```Bash
+Usage:
+  knock [OPTIONS]
+
+Help Options:
+  -h, --help=               Show this help message
+
+Application Options:
+  -c, --clients=CLIENTS     the number of individual load elements (0)
+  -d, --duration=SECONDS    the number of seconds to run this benchmark (0)
+  -v, --verbose
+  -p=                       additional properties ({})
+      --version             display version information (false)
+      --client-stats        whether or not to track individual client statistics (false)
+  -r, --runtime-profile=STR Go runtime profiles (e.g. cpu, memory, block, threadcount, or behavior-specifc) ({})
+```
 
 ### Why?
-
 
 If you look around the Web, it seems like most benchmarks are able to measure a staggering number of metrics from a specific function (e.g. an HTTP server).
 
 `knock` is interested in obtaining two metrics from any conceivable function.
-
-It's *different*.
-
 
 ### No, really, what are you up to?
 
