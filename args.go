@@ -17,6 +17,7 @@ type AppConfig struct {
 	PerClientStats bool              `long:"client-stats" default:"false" optional:"true" description:"whether or not to track individual client statistics"`
 	Properties     map[string]string `short:"p" description:"additional properties" optional:"true"`
 	Version        bool              `long:"version" optional:"true" default:"false" description:"display version information"`
+	Profiles       map[string]string `short:"r" long:"runtime-profile" optional:"true" description:"Go runtime profiles (e.g. cpu, memory, block, threadcount, or behavior-specifc)"`
 
 	d time.Duration
 }

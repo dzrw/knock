@@ -1,10 +1,12 @@
 package main
 
 import (
+	"log"
 	"math/rand"
 	"os"
 	"os/signal"
 	"runtime"
+	"runtime/pprof"
 	"syscall"
 	"time"
 )
@@ -13,6 +15,18 @@ func RunBenchmark(conf *AppConfig, factory BehaviorFactory) {
 	if conf.Version {
 		printVersion()
 		return
+	}
+
+	// If we're doing CPU profiling, we've got to set that up at
+	// the start.
+	if path, ok := conf.Profiles["cpu"]; ok {
+		f, err := os.Create(path)
+		if err != nil {
+			return
+		}
+
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
 	}
 
 	// Schedule all of the logical cores.
@@ -49,6 +63,7 @@ func await(conf *AppConfig, m *master) {
 			}
 
 		case <-m.t.Dead():
+			writeProfiles(conf)
 			PrintReport(os.Stdout, m.Statistics(), conf)
 			return
 
@@ -58,4 +73,32 @@ func await(conf *AppConfig, m *master) {
 			}
 		}
 	}
+}
+
+func writeProfiles(conf *AppConfig) {
+	for name, v := range conf.Profiles {
+		if err := writeProfile(name, v); err != nil {
+			log.Fatalf("error writing %s profile: %v", name, err)
+		}
+	}
+}
+
+func writeProfile(name, path string) (err error) {
+	p := pprof.Lookup(name)
+	if p == nil {
+		return
+	}
+
+	f, err := os.Create(path)
+	if err != nil {
+		return
+	}
+
+	err = p.WriteTo(f, 0)
+	if err != nil {
+		return
+	}
+
+	f.Close()
+	return
 }

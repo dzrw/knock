@@ -2,4 +2,4 @@ knock
 dist/
 *.dat
 *.tsv
-
+*.prof
