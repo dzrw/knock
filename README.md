@@ -33,7 +33,7 @@ Application Options:
 ```Bash
 export KNOCK_URL=-p mongodb.url:mongodb://localhost:27017
 export KNOCK_EXP_CONF=-p mongodb.run:writes -p mongodb.writeConcern:w=1 -p mongodb.doc_length:512
-export KNOCK_REPORT_FILE=results/writes-512b-c15.tsv
+export KNOCK_REPORT_FILE=results/writes-512b-c4-w1.tsv
 
 knock -c4 -d15 -v $KNOCK_URL $KNOCK_EXP_CONF > $KNOCK_REPORT_FILE
 ```
