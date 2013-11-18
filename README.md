@@ -57,7 +57,7 @@ Java is great for many things, but requiring 500GB of dependencies to build a CL
 
 ### Similar Tools
 
-[JMeter](http://jmeter.apache.org/)
-[wrk](https://github.com/wg/wrk)
-[mongo-perf](https://github.com/mongodb/mongo-perf)
+* [JMeter](http://jmeter.apache.org/)
+* [wrk](https://github.com/wg/wrk)
+* [mongo-perf](https://github.com/mongodb/mongo-perf)
 
