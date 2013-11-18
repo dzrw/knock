@@ -4,11 +4,13 @@ require 'pty'
 
 # Script configuration
 TARGET = "prod"
+MONGO_HOST = "CHANGEME"
 SCRIPT_DEBUG_MODE = true
+KNOCK_OUT_BASE_DIR = '~/.knock/measurements'
 
 # Things that probably don't need to change...
-KNOCK_URL = "mongodb://sd-mongo.#{TARGET}.chi.intsm.net:27017"
-KNOCK_OUT_DIR = "/home/dzarlengo/measurements/knock/sd-mongo.#{TARGET}"
+KNOCK_URL = "mongodb://#{MONGO_HOST}:27017"
+KNOCK_OUT_DIR = "#{KNOCK_OUT_BASE_DIR}/#{TARGET}/#{MONGO_HOST}"
 
 KNOCK_PLANS = [
 
