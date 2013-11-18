@@ -47,7 +47,7 @@ Although you can run knock directly from the command-line, it's currently easier
 
 #### No, really, what are you up to?
 
-I couldn't find a decent MongoDB benchmarking tool that was able to examine the behavior of atomic increments under varying Write Concerns, so I wrote the tool myself in a way that is constrained enough (i.e. only 2 metrics) to be plausibly extensible.
+I wasn't able to find a MongoDB benchmarking tool that was able to examine the behavior of atomic increments under varying Write Concerns, so I wrote the tool myself in a way that is constrained enough (i.e. only 2 metrics) to be plausibly extensible.
 
 #### Why didn't you use JMeter?
 
@@ -55,7 +55,9 @@ I couldn't find a decent MongoDB benchmarking tool that was able to examine the 
 
 Java is great for many things, but requiring 500GB of dependencies to build a CLI app that takes 60s to start seemed like a poor experiance.
 
-#### But, I like Java.
+### Similar Tools
 
-Well, you'll probably find what you're looking for [here](http://jmeter.apache.org/).
+[JMeter](http://jmeter.apache.org/)
+[wrk](https://github.com/wg/wrk)
+[mongo-perf](https://github.com/mongodb/mongo-perf)
 
