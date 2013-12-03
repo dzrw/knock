@@ -45,15 +45,9 @@ Although you can run knock directly from the command-line, it's currently easier
 
 ### FAQ
 
-#### No, really, what are you up to?
+#### Why did you build this?
 
 I wasn't able to find a MongoDB benchmarking tool that was able to examine the behavior of atomic increments under varying Write Concerns, so I wrote the tool myself in a way that is constrained enough (i.e. only 2 metrics) to be plausibly extensible.
-
-#### Why didn't you use JMeter?
-
-`knock` is 4MB, *without any other dependencies*, a program that I can just drop on a box and use the moment after the bits land.  The Go runtime is conceptually simple enough to reason about that doing a performance analysis of knock itself isn't a long-term team effort.  Understanding the performance characteristics of the tool itself is a big part of getting good numbers.
-
-Java is great for many things, but requiring 500GB of dependencies to build a CLI app that takes 60s to start seemed like a poor experiance.
 
 ### Similar Tools
 
